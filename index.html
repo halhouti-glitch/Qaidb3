@@ -386,7 +386,7 @@
   let editingRound = null; // index of round currently being edited (UI state, not persisted)
 
   // Per-player color palette (cycles if >6, but we cap at 6 anyway)
-  const PLAYER_COLORS = ['#06b6d4', '#ec4899', '#84cc16', '#f97316', '#a855f7', '#facc15'];
+  const PLAYER_COLORS = ['#ec4899', '#06b6d4', '#facc15', '#a855f7', '#f97316', '#84cc16'];
   function pcolor(i) { return PLAYER_COLORS[i % PLAYER_COLORS.length]; }
   function pdot(i) { return `<span class="pdot" style="background:${pcolor(i)}"></span>`; }
 
