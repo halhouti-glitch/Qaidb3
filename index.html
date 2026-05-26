@@ -1048,6 +1048,64 @@
     margin: 0 0 10px;
     padding: 0 4px;
   }
+  /* Section header with an inline clear-all action on the trailing side. */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0 4px;
+    margin: 0 0 10px;
+  }
+  .section-head h3 {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .section-head .clear-link {
+    font-size: 12px;
+    color: var(--negative);
+    background: transparent;
+    border: 0;
+    padding: 4px 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-family: inherit;
+    opacity: 0.85;
+    border-radius: 8px;
+  }
+  .section-head .clear-link:hover { opacity: 1; background: var(--accent-soft); }
+
+  /* Trailing × on each recent-game row */
+  .recent-row .remove-x {
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 999px;
+    margin-inline-start: 8px;
+    opacity: 0.6;
+    transition: opacity 120ms, color 120ms, background 120ms;
+  }
+  .recent-row .remove-x:hover {
+    opacity: 1;
+    color: var(--negative);
+    background: var(--accent-soft);
+  }
+
+  /* "Remove player" button inside the profile sheet (danger style). */
+  .profile-body .remove-profile {
+    margin-top: 6px;
+    background: transparent;
+    color: var(--negative);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    font-weight: 600;
+  }
+  .profile-body .remove-profile:hover { background: var(--accent-soft); }
   .players-strip {
     display: flex;
     gap: 8px;
@@ -1774,11 +1832,17 @@
         <button type="button" onclick="navigate('play')" data-t="resumeGame"></button>
       </div>
       <div id="playersSection" class="players-section hidden">
-        <h3 data-t="topPlayers"></h3>
+        <div class="section-head">
+          <h3 data-t="topPlayers"></h3>
+          <button class="clear-link" type="button" onclick="clearAllProfiles()" data-t="clearAll"></button>
+        </div>
         <div id="playersList"></div>
       </div>
       <div id="recentSection" class="recent-section hidden">
-        <h3 data-t="recentGames"></h3>
+        <div class="section-head">
+          <h3 data-t="recentGames"></h3>
+          <button class="clear-link" type="button" onclick="clearAllRecents()" data-t="clearAll"></button>
+        </div>
         <div id="recentList"></div>
       </div>
     </div>
@@ -2211,7 +2275,7 @@
       document.getElementById('recentSection').classList.add('hidden');
     } else {
       document.getElementById('recentSection').classList.remove('hidden');
-      recents.slice(0, 5).forEach(g => {
+      recents.slice(0, 5).forEach((g, gi) => {
         const gameNameKey = g.kind === 'kout' ? 'gameKout' : g.kind === 'sebeeta' ? 'gameSebeeta' : 'gameCustom';
         const when = relativeWhen(g.when);
         const row = document.createElement('div');
@@ -2224,7 +2288,13 @@
           <div class="right">
             <div class="winner">${escapeHtml(g.winner || '')}</div>
             <div class="score">${escapeHtml(g.score || '')}</div>
-          </div>`;
+          </div>
+          <button class="remove-x" type="button" aria-label="Remove">×</button>`;
+        // Closure captures gi so the right row gets removed.
+        row.querySelector('.remove-x').onclick = (e) => {
+          e.stopPropagation();
+          removeRecentGame(gi);
+        };
         list.appendChild(row);
       });
     }
@@ -2407,7 +2477,15 @@
         <div class="label">${escapeHtml(t('profileTopTeammate'))}</div>
         ${teammateValue}
       </div>
+      <button class="remove-profile" type="button" data-action="remove-profile">
+        ${escapeHtml(t('removePlayer'))}
+      </button>
     `;
+    // Wire Remove button — closure captures the active key so the user can't
+    // accidentally remove the wrong profile after multiple opens.
+    const removeBtn = body.querySelector('[data-action="remove-profile"]');
+    if (removeBtn) removeBtn.onclick = () => removeProfile(key);
+
     document.getElementById('profileScrim').classList.remove('hidden');
     document.getElementById('profileSheet').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -2416,6 +2494,45 @@
     document.getElementById('profileScrim').classList.add('hidden');
     document.getElementById('profileSheet').classList.add('hidden');
     document.body.style.overflow = '';
+  }
+
+  // ===== History clear actions =====
+  // Wipe a single profile keyed by lowercase name. Called from the Remove
+  // button inside the profile sheet.
+  function removeProfile(key) {
+    const profile = state.playerProfiles && state.playerProfiles[key];
+    if (!profile) return;
+    if (!confirm(t('confirmRemovePlayer')(profile.name))) return;
+    delete state.playerProfiles[key];
+    save();
+    closeProfileSheet();
+    render();
+  }
+  // Wipe a single entry from the recent-games list by its index in the list
+  // as currently rendered. Render order matches state.recentGames so the
+  // index passes through directly.
+  function removeRecentGame(idx) {
+    if (!state.recentGames || idx < 0 || idx >= state.recentGames.length) return;
+    if (!confirm(t('confirmRemoveGame'))) return;
+    state.recentGames.splice(idx, 1);
+    save();
+    render();
+  }
+  // Wipe every player profile in one go (Top players → Clear).
+  function clearAllProfiles() {
+    if (!state.playerProfiles || Object.keys(state.playerProfiles).length === 0) return;
+    if (!confirm(t('confirmClearProfiles'))) return;
+    state.playerProfiles = {};
+    save();
+    render();
+  }
+  // Wipe every recent game (Recent games → Clear).
+  function clearAllRecents() {
+    if (!state.recentGames || state.recentGames.length === 0) return;
+    if (!confirm(t('confirmClearRecents'))) return;
+    state.recentGames = [];
+    save();
+    render();
   }
 
   // Find the name (canonical case) most frequently teamed with this player.
@@ -3487,6 +3604,7 @@
     setKoutEntryMode, setEntryStyle,
     startEditRound, saveEditedRound, cancelEditRound, deleteRound,
     openProfileSheet, closeProfileSheet,
+    removeProfile, removeRecentGame, clearAllProfiles, clearAllRecents,
   });
 </script>
 </body>
