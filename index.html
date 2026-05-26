@@ -1037,6 +1037,93 @@
   .recent-row .right .winner { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
   .recent-row .right .score { font-family: var(--font-num); font-size: 13px; color: var(--ink); font-weight: 600; }
 
+  /* Players card on the home screen — horizontally scrollable pills sorted
+     by gamesPlayed. Each pill is tappable and opens the profile sheet. */
+  .players-section { margin-top: 18px; }
+  .players-section h3 {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+    padding: 0 4px;
+  }
+  .players-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 4px 8px;
+    margin: 0 -4px;
+    scrollbar-width: none;
+  }
+  .players-strip::-webkit-scrollbar { display: none; }
+  .player-pill {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px 10px 10px;
+    background: var(--surface);
+    border-radius: 999px;
+    box-shadow: var(--shadow-card);
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink);
+  }
+  .player-pill:active { transform: scale(0.97); }
+  .player-pill .avatar {
+    width: 32px; height: 32px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--surface-solid);
+    display: grid; place-items: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .player-pill .pp-name { font-weight: 600; font-size: 14px; }
+  .player-pill .pp-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+  /* Profile sheet body */
+  .profile-body {
+    display: grid;
+    gap: 14px;
+    padding: 4px 0;
+  }
+  .profile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .profile-stat {
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .profile-stat .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .profile-stat .value {
+    font-family: var(--font-num);
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .profile-stat .value.small {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+
   /* Play screen — bottom action bar */
   .play-body { padding-bottom: 4px; }
   .play-actions {
@@ -1686,10 +1773,30 @@
       <div id="resumeRow" class="resume-row hidden">
         <button type="button" onclick="navigate('play')" data-t="resumeGame"></button>
       </div>
+      <div id="playersSection" class="players-section hidden">
+        <h3 data-t="topPlayers"></h3>
+        <div id="playersList"></div>
+      </div>
       <div id="recentSection" class="recent-section hidden">
         <h3 data-t="recentGames"></h3>
         <div id="recentList"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- PLAYER PROFILE SHEET — opened from the home screen players list -->
+  <div id="profileScrim" class="sheet-scrim hidden" onclick="closeProfileSheet()"></div>
+  <div id="profileSheet" class="sheet hidden">
+    <div class="grabber"></div>
+    <div class="sheet-header">
+      <h2 id="profileName"></h2>
+      <button class="icon-btn" onclick="closeProfileSheet()" aria-label="Close">×</button>
+    </div>
+    <div class="sheet-body">
+      <div id="profileBody" class="profile-body"></div>
+    </div>
+    <div class="sheet-foot">
+      <button class="secondary" onclick="closeProfileSheet()" data-t="cancelBtn"></button>
     </div>
   </div>
 
@@ -1859,7 +1966,11 @@
     currentScreen: 'home',         // 'home' | 'setup' | 'play' | 'history' | 'winner'
     recentGames: [],               // array of { kind, players, when, winner, score, teamNames }
     theme: 'light',                // 'light' | 'dark' — UI theme
-    sound: 'on'                    // 'on' | 'off' — controls both haptics and Web Audio blips
+    sound: 'on',                   // 'on' | 'off' — controls both haptics and Web Audio blips
+    // Player profiles, keyed by name.toLowerCase().trim(). Each entry:
+    //   { name, gamesPlayed, wins, lastPlayed, teammates: { otherKey: count } }
+    // Built up incrementally as games finish (see logFinishedGame).
+    playerProfiles: {},
   };
   let editingRound = null; // index of round currently being edited (UI state, not persisted)
 
@@ -2117,6 +2228,37 @@
         list.appendChild(row);
       });
     }
+
+    // Top players strip (built from state.playerProfiles).
+    const playersList = document.getElementById('playersList');
+    playersList.innerHTML = '';
+    const profiles = _topProfiles(8);
+    if (profiles.length === 0) {
+      document.getElementById('playersSection').classList.add('hidden');
+    } else {
+      document.getElementById('playersSection').classList.remove('hidden');
+      const strip = document.createElement('div');
+      strip.className = 'players-strip';
+      profiles.forEach((p) => {
+        const initial = (p.name || '?').trim().charAt(0).toUpperCase();
+        const meta = t('roundsPlayed')
+          ? `${p.gamesPlayed} · ${p.wins}W`
+          : `${p.gamesPlayed} games`;
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'player-pill';
+        // Pass the lowercased key so case differences across games don't matter.
+        pill.onclick = () => openProfileSheet((p.name || '').toLowerCase());
+        pill.innerHTML = `
+          <span class="avatar">${escapeHtml(initial)}</span>
+          <span>
+            <div class="pp-name">${escapeHtml(p.name)}</div>
+            <div class="pp-meta">${escapeHtml(meta)}</div>
+          </span>`;
+        strip.appendChild(pill);
+      });
+      playersList.appendChild(strip);
+    }
   }
 
   function relativeWhen(ts) {
@@ -2140,6 +2282,8 @@
       kind: state.gameMode,
       players: state.players.slice(),
       teamNames: state.teamNames ? state.teamNames.slice() : [],
+      // Persist playerTeam so future stats (and any backfill) know team mapping.
+      playerTeam: state.playerTeam ? state.playerTeam.slice() : [],
       when: Date.now(),
       roundCount: state.scores.length,
       winner: winnerObj.type === 'player' ? state.players[winnerObj.idx] : teamName(winnerObj.idx),
@@ -2148,7 +2292,142 @@
         : (winnerObj.type === 'player' ? `${totalsArr[winnerObj.idx]}` : `${totalsArr.join(' / ')}`)
     };
     state.recentGames = [recent, ...(state.recentGames || [])].slice(0, 10);
+    _updatePlayerProfiles(winnerObj);
     state.gameLogged = true;
+  }
+
+  // ===== Player profiles =====
+  // Build / update lifetime stats for every player who took part. Called once
+  // per finished game from logFinishedGame.
+  //
+  // Win attribution per mode:
+  //   custom  → only winnerObj.idx player wins
+  //   sebeeta → all 3 players on the opposing team of the loser-trigger win
+  //   kout    → all 3 players on the team that hit the threshold win
+  //
+  // Teammate tally is mode-aware: only sebeeta + kout (team modes) record
+  // pairings, since custom is solo.
+  function _updatePlayerProfiles(winnerObj) {
+    if (!state.players || state.players.length === 0) return;
+    if (!state.playerProfiles) state.playerProfiles = {};
+
+    // Resolve which player indices count as winners.
+    const winnerIdxSet = new Set();
+    if (winnerObj.type === 'player') {
+      winnerIdxSet.add(winnerObj.idx);
+    } else if (winnerObj.type === 'team') {
+      state.players.forEach((_, pIdx) => {
+        if ((state.playerTeam || [])[pIdx] === winnerObj.idx) winnerIdxSet.add(pIdx);
+      });
+    }
+
+    const now = Date.now();
+    const teamMode = state.gameMode === 'sebeeta' || state.gameMode === 'kout';
+
+    state.players.forEach((rawName, pIdx) => {
+      const name = (rawName || '').trim();
+      if (!name) return;
+      const key = name.toLowerCase();
+      const prev = state.playerProfiles[key] || {
+        name,
+        gamesPlayed: 0,
+        wins: 0,
+        lastPlayed: 0,
+        teammates: {},
+      };
+      prev.name = name;                  // refresh canonical casing to latest
+      prev.gamesPlayed += 1;
+      if (winnerIdxSet.has(pIdx)) prev.wins += 1;
+      prev.lastPlayed = now;
+
+      // Teammate counts — only the player(s) on the SAME team as this player,
+      // excluding themselves. Custom mode has no teams → skip.
+      if (teamMode && state.playerTeam) {
+        const myTeam = state.playerTeam[pIdx];
+        state.players.forEach((otherName, otherIdx) => {
+          if (otherIdx === pIdx) return;
+          if (state.playerTeam[otherIdx] !== myTeam) return;
+          const otherKey = (otherName || '').trim().toLowerCase();
+          if (!otherKey) return;
+          prev.teammates[otherKey] = (prev.teammates[otherKey] || 0) + 1;
+        });
+      }
+
+      state.playerProfiles[key] = prev;
+    });
+  }
+
+  // Return the top N profiles ordered by gamesPlayed desc, lastPlayed desc as tiebreak.
+  function _topProfiles(n) {
+    const list = Object.values(state.playerProfiles || {});
+    list.sort((a, b) => {
+      if (b.gamesPlayed !== a.gamesPlayed) return b.gamesPlayed - a.gamesPlayed;
+      return (b.lastPlayed || 0) - (a.lastPlayed || 0);
+    });
+    return list.slice(0, n || 6);
+  }
+
+  // Open the profile sheet for a player keyed by name.toLowerCase().
+  function openProfileSheet(key) {
+    const profile = (state.playerProfiles || {})[key];
+    if (!profile) return;
+    document.getElementById('profileName').textContent = profile.name;
+    const body = document.getElementById('profileBody');
+    const winRate = profile.gamesPlayed > 0
+      ? Math.round((profile.wins / profile.gamesPlayed) * 100) + '%'
+      : '—';
+    const lastPlayed = profile.lastPlayed
+      ? relativeWhen(profile.lastPlayed)
+      : t('profileNeverPlayed');
+    const topMate = _topTeammate(profile);
+    const teammateValue = topMate
+      ? `<div class="value small">${escapeHtml(t('profileTeammateOf')(topMate.name, topMate.count))}</div>`
+      : '<div class="value small">—</div>';
+
+    body.innerHTML = `
+      <div class="profile-stats-grid">
+        <div class="profile-stat">
+          <div class="label">${escapeHtml(t('profileGamesPlayed'))}</div>
+          <div class="value">${profile.gamesPlayed}</div>
+        </div>
+        <div class="profile-stat">
+          <div class="label">${escapeHtml(t('profileWins'))}</div>
+          <div class="value">${profile.wins}</div>
+        </div>
+        <div class="profile-stat">
+          <div class="label">${escapeHtml(t('profileWinRate'))}</div>
+          <div class="value">${escapeHtml(winRate)}</div>
+        </div>
+        <div class="profile-stat">
+          <div class="label">${escapeHtml(t('profileLastPlayed'))}</div>
+          <div class="value small">${escapeHtml(lastPlayed)}</div>
+        </div>
+      </div>
+      <div class="profile-stat">
+        <div class="label">${escapeHtml(t('profileTopTeammate'))}</div>
+        ${teammateValue}
+      </div>
+    `;
+    document.getElementById('profileScrim').classList.remove('hidden');
+    document.getElementById('profileSheet').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeProfileSheet() {
+    document.getElementById('profileScrim').classList.add('hidden');
+    document.getElementById('profileSheet').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // Find the name (canonical case) most frequently teamed with this player.
+  function _topTeammate(profile) {
+    if (!profile || !profile.teammates) return null;
+    let bestKey = null, bestCount = 0;
+    for (const [k, c] of Object.entries(profile.teammates)) {
+      if (c > bestCount) { bestCount = c; bestKey = k; }
+    }
+    if (!bestKey) return null;
+    const otherProfile = state.playerProfiles[bestKey];
+    return { name: otherProfile ? otherProfile.name : bestKey, count: bestCount };
   }
 
   // ===== Bottom sheet for round entry =====
@@ -2292,7 +2571,8 @@
           const input = document.createElement('input');
           input.type = 'text';
           input.id = 'playerName' + playerIdx;
-          input.value = `${t('playerDefault')} ${playerIdx + 1}`;
+          input.setAttribute('list', 'playerProfilesList');
+          input.autocomplete = 'off';
           input.placeholder = `${t('playerDefault')} ${playerIdx + 1}`;
           row.appendChild(input);
           col.appendChild(row);
@@ -2323,14 +2603,37 @@
         const input = document.createElement('input');
         input.type = 'text';
         input.id = 'playerName' + i;
-        input.value = `${t('playerDefault')} ${i+1}`;
+        input.setAttribute('list', 'playerProfilesList');
+        input.autocomplete = 'off';
         input.placeholder = `${t('playerDefault')} ${i+1}`;
         row.appendChild(input);
         wrap.appendChild(row);
         container.appendChild(wrap);
       }
     }
+    // Refresh the typeahead options with the current profile list so the
+    // browser's <datalist> dropdown shows past players as the user types.
+    _refreshPlayerDatalist();
     document.getElementById('playerNameSection').classList.remove('hidden');
+  }
+
+  // Build / refresh the shared <datalist> the player-setup inputs read from.
+  // Idempotent — safe to call on every render.
+  function _refreshPlayerDatalist() {
+    let list = document.getElementById('playerProfilesList');
+    if (!list) {
+      list = document.createElement('datalist');
+      list.id = 'playerProfilesList';
+      document.body.appendChild(list);
+    }
+    const profiles = Object.values(state.playerProfiles || {});
+    profiles.sort((a, b) => {
+      if (b.gamesPlayed !== a.gamesPlayed) return b.gamesPlayed - a.gamesPlayed;
+      return (b.lastPlayed || 0) - (a.lastPlayed || 0);
+    });
+    list.innerHTML = profiles
+      .map((p) => `<option value="${escapeHtml(p.name)}"></option>`)
+      .join('');
   }
 
   function startGame() {
@@ -3183,6 +3486,7 @@
     shareGameImage,
     setKoutEntryMode, setEntryStyle,
     startEditRound, saveEditedRound, cancelEditRound, deleteRound,
+    openProfileSheet, closeProfileSheet,
   });
 </script>
 </body>
