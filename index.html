@@ -254,6 +254,13 @@
     border-radius: var(--radius);
     border: 0;
     cursor: pointer;
+    /* Disable iOS double-tap-to-zoom on rapid presses. `manipulation` keeps
+       single-tap and pan/pinch working but drops the 300ms double-tap delay
+       and the zoom gesture, which was misfiring when typing fast on numpad. */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
     background: var(--ink);
     color: var(--bg);
     transition: transform 80ms ease, opacity 120ms ease, background 120ms ease;
@@ -3064,7 +3071,7 @@
     pen.type = 'button';
     pen.className = 'np-pen';
     pen.textContent = '−10';
-    pen.onclick = () => { numpadBuffer = '-10'; renderSheet(); };
+    pen.onclick = () => { numpadBuffer = '-10'; _updateNumpadDisplay(); };
     footer.appendChild(pen);
 
     const next = document.createElement('button');
@@ -3091,12 +3098,24 @@
       else if (numpadBuffer.startsWith('-')) numpadBuffer = numpadBuffer.slice(1);
       else numpadBuffer = '-' + numpadBuffer;
     } else {
-      // digit
+      // digit — cap length so we don't blow past the display.
       if (numpadBuffer === '0') numpadBuffer = k;
       else if (numpadBuffer === '-') numpadBuffer = '-' + k;
-      else numpadBuffer = numpadBuffer + k;
+      else if (numpadBuffer.length < 6) numpadBuffer += k;
     }
-    renderSheet();
+    // Light update: only the display value changes per keystroke. Avoid
+    // re-rendering the whole sheet — that was rebuilding all 12 buttons +
+    // footer per tap and felt sluggish on phones.
+    _updateNumpadDisplay();
+  }
+
+  // Light-touch DOM update for the numpad. Used by digit/backspace/sign and
+  // the -10 shortcut. Falls back to a full renderSheet if the display node
+  // isn't found (e.g. sheet got rebuilt out from under us).
+  function _updateNumpadDisplay() {
+    const disp = document.querySelector('.numpad-display');
+    if (disp) disp.textContent = numpadBuffer;
+    else renderSheet();
   }
 
   function numpadNav(dir) {
