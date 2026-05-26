@@ -1,0 +1,39 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Qaid</title>
+
+<!-- Background tile -->
+<rect width="512" height="512" rx="112" fill="#0F1A2E"/>
+
+<!-- Card group, centred & rotated -->
+<g transform="translate(256 256) rotate(-8)">
+  <!-- shadow -->
+  <rect x="-108" y="-142" width="220" height="300" rx="28" fill="#000000" opacity="0.32"/>
+  <!-- card body -->
+  <rect x="-112" y="-148" width="220" height="300" rx="28" fill="#FFFFFF" stroke="#0F1A2E" stroke-width="4"/>
+
+  <!-- top-left "Q" + heart -->
+  <text x="-94" y="-98" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="56" fill="#D72638">Q</text>
+  <g transform="translate(-72 -62) scale(0.55)">
+    <ellipse cx="-12" cy="-6" rx="14" ry="14" fill="#D72638"/>
+    <ellipse cx="12"  cy="-6" rx="14" ry="14" fill="#D72638"/>
+    <polygon points="-25,4 25,4 0,38" fill="#D72638"/>
+  </g>
+
+  <!-- centre large heart -->
+  <g transform="translate(0 14) scale(1.55)">
+    <ellipse cx="-12" cy="-6" rx="16" ry="16" fill="#D72638"/>
+    <ellipse cx="12"  cy="-6" rx="16" ry="16" fill="#D72638"/>
+    <polygon points="-27,4 27,4 0,40" fill="#D72638"/>
+  </g>
+
+  <!-- bottom-right "Q" + heart (rotated 180°) -->
+  <g transform="rotate(180)">
+    <text x="-94" y="-98" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="56" fill="#D72638">Q</text>
+    <g transform="translate(-72 -62) scale(0.55)">
+      <ellipse cx="-12" cy="-6" rx="14" ry="14" fill="#D72638"/>
+      <ellipse cx="12"  cy="-6" rx="14" ry="14" fill="#D72638"/>
+      <polygon points="-25,4 25,4 0,38" fill="#D72638"/>
+    </g>
+  </g>
+</g>
+</svg>
