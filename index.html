@@ -2498,16 +2498,15 @@
         const isDealer = i === dealer && total > 0;
         const isWinnerTile = winner && winner.type === 'player' && winner.idx === i;
         const pct = Math.min(100, (Math.abs(total) / state.threshold) * 100);
-        const teamChip = isTeamMode()
-          ? `<span class="team-chip">${escapeHtml(state.playerTeam[i] === 0 ? t('teamA') : t('teamB'))}</span>`
-          : '';
+        // Per-player team badge intentionally omitted — team identity is
+        // already implied by the team summary row at the top of the screen.
         const dealerBadge = isDealer ? `<span class="dealer-badge">${escapeHtml(t('dealerBadge'))}</span>` : '';
         const winnerBadge = isWinnerTile ? `<span class="winner-badge">${escapeHtml(t('winnerBadge'))}</span>` : '';
         const tile = document.createElement('div');
         tile.className = 'player-tile' + (isWinnerTile || isDealer ? ' leader' : '');
         tile.innerHTML = `
           <div class="pt-head">
-            <div class="pt-name">${escapeHtml(name)}${teamChip}${dealerBadge}${winnerBadge}</div>
+            <div class="pt-name">${escapeHtml(name)}${dealerBadge}${winnerBadge}</div>
             <span class="pt-seat">${i + 1}</span>
           </div>
           <div>
