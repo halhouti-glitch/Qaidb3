@@ -1823,219 +1823,25 @@
   </div>
 </div>
 
-<script>
-  const I18N = {
-    en: {
-      title: 'قيد بلوك 3',
-      language: 'Language',
-      gameSetup: 'Game Setup',
-      numPlayersLabel: 'Number of players (2–6)',
-      thresholdLabel: 'Points (Win/Loss)',
-      winCondLabel: 'Win condition',
-      lowestWins: 'Highest score loses',
-      highestWins: 'Highest score wins',
-      setPlayers: 'Done',
-      playerNames: 'Player Names',
-      playerDefault: 'Player',
-      startGame: 'Start Game',
-      standings: 'Standings',
-      thPlayer: 'Player',
-      thTotal: 'Total',
-      thRoundsPlayed: 'Rounds',
-      thToThreshold: 'To Win/Lose',
-      dealerBadge: 'D',
-      winnerBadge: 'Winner',
-      enterRound: 'Enter Round',
-      enterRoundSuffix: 'Scores',
-      saveRound: 'Save Round',
-      undoRound: 'Undo Last Round',
-      resetGame: 'Reset Game',
-      roundHistory: 'Round History',
-      thRound: 'Round',
-      thDealerAfter: 'Dealer',
-      infoHighest: (t) => `Points to win: ${t} — first to reach wins; dealer is the lowest score.`,
-      infoLowest:  (t) => `Points to lose: ${t} — when anyone reaches it, lowest score wins; dealer is the highest score.`,
-      winnerBanner: (n, t) => `🏆 ${n} wins with ${t} points!`,
-      confirmUndo: 'Undo the last round?',
-      toastRoundAdded: 'Round added',
-      toastRoundUndone: 'Round undone',
-      undoAction: 'Undo',
-      shareGame: 'Share',
-      shareTitle: 'Game Summary',
-      shareError: 'Could not generate image.',
-      shareWinnerLine: (n) => `${n} wins!`,
-      finalStandings: 'Final Standings',
-      confirmReset: 'Reset the game? Scores will be cleared but players stay.',
-      thActions: 'Actions',
-      editBtn: 'Edit',
-      deleteBtn: 'Delete',
-      saveBtn: 'Save',
-      cancelBtn: 'Cancel',
-      editingRoundLabel: (n) => `Editing Round ${n}`,
-      confirmDelete: (n) => `Delete round ${n}? Totals will be recalculated.`,
-      minusBtn: 'Minus (−10)',
-      clearPlayers: 'New Game',
-      confirmClearPlayers: 'Start a new game with new players? This ends the current game.',
-      gameType: 'Game',
-      gameCustom: 'Custom',
-      gameSebeeta: 'Sebeeta',
-      gameKout: 'Kout',
-      teamA: 'A',
-      teamB: 'B',
-      teamAFull: 'Team Alif',
-      teamBFull: 'Team Baa',
-      teamLabel: 'Team',
-      thTeam: 'Team',
-      teamTotal: 'Team Total',
-      teamUneven: (a, b) => `Each team must have 3 players (currently ${a} / ${b}).`,
-      teamWinnerBanner: (n) => `🏆 ${n} wins!`,
-      sebeetaHint: 'Sebeeta: 6 players in 2 teams of 3. Any individual score reaching 201 ends the game — the opposing team wins.',
-      koutHint: 'Kout: 6 players in 2 teams of 3. Scores are entered per team. First team to 101 wins.',
-      contractMode: 'Contract',
-      manualMode: 'Manual',
-      callerLabel: 'Caller',
-      levelLabel: 'Level',
-      outcomeLabel: 'Outcome',
-      levelBab: 'Bab',
-      levelBawan: 'Bawan',
-      levelMalzoom: 'Malzoom',
-      outcomeMade: 'Made it',
-      outcomeFailed: 'Failed',
-      contractHint: 'Pick caller, level, and outcome to compute the scores.',
-      homePickGame: 'Pick a game',
-      homeTitle: 'Keep score, fast.',
-      homeSub: 'Three preset games — Sebeeta, Kout, and an open scorepad for everything else.',
-      gameSebeetaDesc: 'Highest score loses. Six players in two teams of three. First to 201 ends the round.',
-      gameSebeetaMeta: '6 players · 2 teams',
-      gameKoutDesc: 'Contract-based. Partners across. First team to 101 wins.',
-      gameKoutMeta: '6 players · 2 teams',
-      gameCustomDesc: 'Open scorepad. 2–6 players, any target, your own rules.',
-      gameCustomMeta: '2–6 players',
-      resumeGame: 'Resume current game',
-      recentGames: 'Recent games',
-      roundLabel: 'Round',
-      recordRound: 'Record round',
-      matchComplete: 'Match complete',
-      newGame: 'New Game',
-      goHome: 'Home',
-      goBack: 'Back',
-      finalScore: 'Final score',
-      roundsPlayed: (n) => `${n} round${n === 1 ? '' : 's'}`,
-      entryStylePlusMinus: 'Bulk',
-      entryStyleNumpad: 'Numpad',
-      manualEntry: 'Manual entry',
-      prevPlayer: 'Previous',
-      nextPlayer: 'Next',
-      themeToggle: 'Theme',
-      themeLight: 'Light',
-      themeDark: 'Dark',
-    },
-    ar: {
-      title: 'قيد بلوك 3',
-      language: 'اللغة',
-      gameSetup: 'إعدادات اللعبة',
-      numPlayersLabel: 'عدد اللاعبين (2–6)',
-      thresholdLabel: 'النقاط (للفوز/للخساره)',
-      winCondLabel: 'طريقة الفوز',
-      lowestWins: 'الأعلى نقاطًا يخسر',
-      highestWins: 'الأعلى نقاطًا يفوز',
-      setPlayers: 'تم',
-      playerNames: 'أسماء اللاعبين',
-      playerDefault: 'لاعب',
-      startGame: 'وزع',
-      standings: 'الترتيب',
-      thPlayer: 'اللاعب',
-      thTotal: 'المجموع',
-      thRoundsPlayed: 'الجولات',
-      thToThreshold: 'للفوز/للخساره',
-      dealerBadge: 'ش',
-      winnerBadge: 'الفائز',
-      enterRound: 'قيد الجولة',
-      enterRoundSuffix: '',
-      saveRound: 'حفظ الجولة',
-      undoRound: 'امسح اخر جولة',
-      resetGame: 'داس جديد',
-      roundHistory: 'القيد',
-      thRound: 'الجولة',
-      thDealerAfter: 'الشيال',
-      infoHighest: (t) => `النقاط للفوز: ${t} — أول من يصل يفوز؛ والشيال هو صاحب أقل نقاط.`,
-      infoLowest:  (t) => `النقاط للخساره: ${t} — عند وصول أي لاعب يفوز صاحب أقل نقاط؛ والشيال هو صاحب أعلى نقاط.`,
-      winnerBanner: (n, t) => `🏆 فاز ${n} برصيد ${t} نقطة!`,
-      confirmUndo: 'مسح الجولة الأخيرة؟',
-      toastRoundAdded: 'تمت إضافة الجولة',
-      toastRoundUndone: 'تم إلغاء الجولة',
-      undoAction: 'تراجع',
-      shareGame: 'مشاركة',
-      shareTitle: 'ملخص اللعبة',
-      shareError: 'تعذر إنشاء الصورة.',
-      shareWinnerLine: (n) => `${n} فاز!`,
-      finalStandings: 'النتائج النهائية',
-      confirmReset: 'داس جديد؟ سيتم مسح النقاط فقط واللاعبين باقين.',
-      thActions: 'تعديل/مسح',
-      editBtn: 'تعديل',
-      deleteBtn: 'مسح',
-      saveBtn: 'حفظ',
-      cancelBtn: 'إلغاء',
-      editingRoundLabel: (n) => `تعديل الجولة ${n}`,
-      confirmDelete: (n) => `مسح الجولة ${n}؟ سيتم إعادة احتساب المجاميع.`,
-      minusBtn: 'ماينس (−10)',
-      clearPlayers: 'قيم جديد',
-      confirmClearPlayers: 'بدء قيم جديد بلاعبين جدد؟ سيتم إنهاء اللعبة الحالية.',
-      gameType: 'اللعبة',
-      gameCustom: 'قيد مفتوح',
-      gameSebeeta: 'سبيته',
-      gameKout: 'كوت',
-      teamA: 'أ',
-      teamB: 'ب',
-      teamAFull: 'فريق ألف',
-      teamBFull: 'فريق باء',
-      teamLabel: 'الفريق',
-      thTeam: 'الفريق',
-      teamTotal: 'مجموع الفريق',
-      teamUneven: (a, b) => `كل فريق يجب أن يحتوي على 3 لاعبين (حالياً ${a} / ${b}).`,
-      teamWinnerBanner: (n) => `🏆 فاز ${n}!`,
-      sebeetaHint: 'سبيته: 6 لاعبين في فريقين كل فريق 3. عند وصول أي لاعب إلى 201 تنتهي اللعبة ويفوز الفريق الآخر.',
-      koutHint: 'كوت: 6 لاعبين في فريقين كل فريق 3. النقاط تُدخل لكل فريق. أول فريق يصل إلى 101 يفوز.',
-      contractMode: 'حكم',
-      manualMode: 'يدوي',
-      callerLabel: 'الحاكم',
-      levelLabel: 'الحكمه',
-      outcomeLabel: 'النتيجة',
-      levelBab: 'باب',
-      levelBawan: 'باون',
-      levelMalzoom: 'ملزوم',
-      outcomeMade: 'فوز',
-      outcomeFailed: 'خساره',
-      contractHint: 'اختر الحاكم والحكمه والنتيجة لحساب النقاط.',
-      homePickGame: 'اختر اللعبة',
-      homeTitle: 'قيد سريع، بدون لخبطه.',
-      homeSub: 'ثلاث ألعاب جاهزة — سبيته، كوت، وقيد مفتوح لأي لعبة ثانية.',
-      gameSebeetaDesc: 'الأعلى نقاطًا يخسر. 6 لاعبين في فريقين كل فريق 3. أول من يوصل 201 ينهي الجولة.',
-      gameSebeetaMeta: '6 لاعبين · فريقين',
-      gameKoutDesc: 'لعبة بالحكم. الشريك بالمقابل. أول فريق يوصل 101 يفوز.',
-      gameKoutMeta: '6 لاعبين · فريقين',
-      gameCustomDesc: 'قيد مفتوح. من 2 إلى 6 لاعبين، أي هدف، قواعدك أنت.',
-      gameCustomMeta: '2 إلى 6 لاعبين',
-      resumeGame: 'كمل اللعبة الحالية',
-      recentGames: 'آخر الألعاب',
-      roundLabel: 'الجولة',
-      recordRound: 'سجل الجولة',
-      matchComplete: 'انتهت اللعبة',
-      newGame: 'قيم جديد',
-      goHome: 'الرئيسية',
-      goBack: 'رجوع',
-      finalScore: 'النتيجة النهائية',
-      roundsPlayed: (n) => `${n} ${n === 1 ? 'جولة' : 'جولات'}`,
-      entryStylePlusMinus: 'جملة',
-      entryStyleNumpad: 'مفرق',
-      manualEntry: 'إدخال يدوي',
-      prevPlayer: 'السابق',
-      nextPlayer: 'التالي',
-      themeToggle: 'الوضع',
-      themeLight: 'فاتح',
-      themeDark: 'داكن',
-    }
-  };
+<script type="module">
+  // Module imports — pure logic lives in js/*.js; this script wires it to the DOM.
+  import { I18N } from './js/i18n.js';
+  import {
+    KOUT_CONTRACT_SCORES,
+    KOUT_LEVELS,
+    computeContractScore,
+    computeTotals,
+    teamTotalsFromPlayers as _teamTotalsFromPlayers,
+    dealerIndex as _dealerIndex,
+    checkWinner as _checkWinner,
+  } from './js/scoring.js';
+  import { escapeHtml } from './js/util.js';
+  import { shareGameImage as _shareGameImage } from './js/share.js';
+
+  // Wrapper: the imported renderer needs the live state passed in; the HTML
+  // onclick handler doesn't have access to module-scoped vars, so we adapt.
+  function shareGameImage() { return _shareGameImage(state); }
+
 
   let state = {
     gameMode: 'sebeeta', // 'sebeeta' | 'kout' | 'custom'
@@ -2061,33 +1867,14 @@
   // Lives outside `state` because it's per-round-in-progress, cleared on submit.
   let koutContract = { caller: null, level: null, outcome: null };
 
-  // Contract scoring table: { level: { made: <caller>, failed: <opponent> } }
-  const KOUT_CONTRACT_SCORES = {
-    bab:     { made: 5,  failed: 10 },
-    '6':     { made: 6,  failed: 12 },
-    '7':     { made: 7,  failed: 14 },
-    '8':     { made: 8,  failed: 16 },
-    bawan:   { made: 36, failed: 18 },
-    malzoom: { made: 5,  failed: 5 },
-  };
-  const KOUT_LEVELS = ['bab', '6', '7', '8', 'bawan', 'malzoom'];
+  // KOUT_CONTRACT_SCORES, KOUT_LEVELS, computeContractScore are imported from js/scoring.js.
 
+  // Label helper — depends on i18n, so it stays close to the rest of the UI code.
   function koutLevelLabel(level) {
     if (level === 'bab') return t('levelBab');
     if (level === 'bawan') return t('levelBawan');
     if (level === 'malzoom') return t('levelMalzoom');
     return level; // '6', '7', '8'
-  }
-
-  // Compute [teamAScore, teamBScore] for a contract. Returns [0,0] if incomplete.
-  function computeContractScore(caller, level, outcome) {
-    if (caller === null || !level || !outcome) return [0, 0];
-    const cfg = KOUT_CONTRACT_SCORES[level];
-    if (!cfg) return [0, 0];
-    const out = [0, 0];
-    if (outcome === 'made') out[caller] = cfg.made;
-    else out[1 - caller] = cfg.failed;
-    return out;
   }
 
   function setKoutEntryMode(mode) {
@@ -2602,78 +2389,21 @@
     navigate('play');
   }
 
-  // Returns per-entity totals.
-  //   custom/sebeeta: one total per player
-  //   kout: one total per team [A, B]
+  // Thin wrappers around the pure scoring functions in js/scoring.js — bind
+  // them to the live `state` so the rest of this file can keep calling them
+  // by short, familiar names.
   function totals() {
     const n = state.gameMode === 'kout' ? 2 : state.players.length;
-    const out = new Array(n).fill(0);
-    state.scores.forEach(round => {
-      for (let i = 0; i < n; i++) out[i] += (round[i] || 0);
-    });
-    return out;
+    return computeTotals(state.scores, n);
   }
-
-  // For sebeeta only: sum per-player totals into per-team totals [A, B]
   function teamTotalsFromPlayers(pTotals) {
-    const t = [0, 0];
-    state.playerTeam.forEach((tIdx, pIdx) => { t[tIdx] += (pTotals[pIdx] || 0); });
-    return t;
+    return _teamTotalsFromPlayers(pTotals, state.playerTeam);
   }
-
-  // Dealer = the side that's losing (opposite of the win condition).
-  //   Custom / Sebeeta (winRule lowest) → highest individual score is dealer.
-  //   Custom (winRule highest)          → lowest individual score is dealer.
-  //   Kout (winRule highest, team-level) → lowest team total is dealer.
   function dealerIndex(totalsArr) {
-    if (totalsArr.length === 0) return -1;
-    if (state.winRule === 'highest') {
-      let min = Infinity, idx = 0;
-      totalsArr.forEach((v, i) => { if (v < min) { min = v; idx = i; } });
-      return idx;
-    } else {
-      let max = -Infinity, idx = 0;
-      totalsArr.forEach((v, i) => { if (v > max) { max = v; idx = i; } });
-      return idx;
-    }
+    return _dealerIndex(totalsArr, state.winRule);
   }
-
-  // Returns { type: 'player' | 'team', idx } when there's a winner, else null.
-  //   custom: winner is a player (highest or lowest depending on winRule)
-  //   sebeeta: winner is the OPPOSING team of any player who hit threshold
-  //   kout: winner is the team that hit the threshold
   function checkWinner(totalsArr) {
-    if (state.gameMode === 'sebeeta') {
-      for (let i = 0; i < totalsArr.length; i++) {
-        if (totalsArr[i] >= state.threshold) {
-          const loserTeam = state.playerTeam[i];
-          return { type: 'team', idx: 1 - loserTeam };
-        }
-      }
-      return null;
-    }
-    if (state.gameMode === 'kout') {
-      // First team to reach threshold; if both crossed in the same round, the higher wins
-      const reached = totalsArr.map((v, i) => v >= state.threshold ? i : -1).filter(i => i >= 0);
-      if (reached.length === 0) return null;
-      let max = -Infinity, idx = -1;
-      reached.forEach(i => { if (totalsArr[i] > max) { max = totalsArr[i]; idx = i; } });
-      return { type: 'team', idx };
-    }
-    // custom
-    if (state.winRule === 'highest') {
-      const reached = totalsArr.map((v, i) => v >= state.threshold ? i : -1).filter(i => i >= 0);
-      if (reached.length === 0) return null;
-      let max = -Infinity, idx = -1;
-      reached.forEach(i => { if (totalsArr[i] > max) { max = totalsArr[i]; idx = i; } });
-      return { type: 'player', idx };
-    } else {
-      const anyReached = totalsArr.some(v => v >= state.threshold);
-      if (!anyReached) return null;
-      let min = Infinity, idx = -1;
-      totalsArr.forEach((v, i) => { if (v < min) { min = v; idx = i; } });
-      return { type: 'player', idx };
-    }
+    return _checkWinner(totalsArr, state);
   }
 
   // Top-level render — picks the right per-screen renderer based on currentScreen,
@@ -3302,375 +3032,6 @@
     showToast(t('toastRoundUndone'));
   }
 
-  // ===== Share game summary as PNG =====
-  // Renders the final standings to a canvas, then either invokes the native
-  // share sheet (mobile, where Web Share API Level 2 supports files) or falls
-  // back to downloading the image (desktop).
-  async function shareGameImage() {
-    try {
-      const blob = await renderGameSummaryPNG();
-      if (!blob) throw new Error('no blob');
-      const filename = `qaid-${new Date().toISOString().slice(0, 10)}.png`;
-      const file = new File([blob], filename, { type: 'image/png' });
-      // Prefer native share sheet so the user can pick WhatsApp/iMessage/etc.
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: t('shareTitle') });
-          return;
-        } catch (e) {
-          // User cancelled. AbortError is the documented signal; ignore.
-          if (e && e.name === 'AbortError') return;
-          // Any other failure → fall through to download.
-        }
-      }
-      // Download fallback (desktop or where Web Share files isn't supported).
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      // Defer revoke so the browser has time to start the download.
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (e) {
-      console.error('shareGameImage failed:', e);
-      alert(t('shareError'));
-    }
-  }
-
-  // Build a 1080×1350 (4:5 portrait, IG-friendly) PNG of the final standings.
-  // Mirrors the in-app aesthetic: light/dark theme, gradient bg, glass card.
-  async function renderGameSummaryPNG() {
-    if (document.fonts && document.fonts.ready) {
-      try { await document.fonts.ready; } catch (_) {}
-    }
-    const W = 1080, H = 1350;
-    const isDark = state.theme === 'dark';
-    const rtl = state.lang === 'ar';
-
-    const C = isDark ? {
-      bgTop: '#1a233e', bgBottom: '#0a0a0c',
-      surface: 'rgba(36,36,40,0.85)',
-      line:    'rgba(255,255,255,0.14)',
-      ink:     '#f5f5f7',
-      inkSoft: '#d6d6d8',
-      muted:   '#9b9b9f',
-      gold:    '#ffd60a',
-      onGold:  '#1a1100',
-      glow1:   'rgba(110,80,40,0.55)',
-      glow2:   'rgba(40,80,140,0.5)',
-    } : {
-      bgTop: '#fff3d6', bgBottom: '#f0eee9',
-      surface: 'rgba(255,255,255,0.92)',
-      line:    'rgba(0,0,0,0.10)',
-      ink:     '#0a0a0a',
-      inkSoft: '#2a2a2a',
-      muted:   '#6e6e72',
-      gold:    '#f5b800',
-      onGold:  '#1a1100',
-      glow1:   'rgba(255,210,170,0.7)',
-      glow2:   'rgba(150,200,255,0.55)',
-    };
-
-    const canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext('2d');
-
-    // --- Background gradient + glow blobs ---
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, C.bgTop);
-    grad.addColorStop(1, C.bgBottom);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
-
-    softBlob(ctx, W * 0.82, 120, 420, C.glow1);
-    softBlob(ctx, W * 0.12, 260, 360, C.glow2);
-    softBlob(ctx, W * 0.5,  H - 140, 380, C.glow1);
-
-    // Font helpers — fall back gracefully if web fonts haven't loaded.
-    const fbody = (size, weight) => `${weight || 600} ${size}px Geist, "IBM Plex Sans Arabic", system-ui, -apple-system, sans-serif`;
-    const fmono = (size, weight) => `${weight || 600} ${size}px "Geist Mono", ui-monospace, monospace`;
-
-    const PAD = 72;
-    ctx.textBaseline = 'top';
-    ctx.direction = rtl ? 'rtl' : 'ltr';
-
-    // --- Header: brand eyebrow + mode title ---
-    ctx.textAlign = rtl ? 'right' : 'left';
-    const headX = rtl ? W - PAD : PAD;
-
-    ctx.fillStyle = C.muted;
-    ctx.font = fbody(28, 600);
-    const brand = rtl ? 'قيد بلوك ٣' : 'QAID · BLOCK 3';
-    ctx.fillText(brand, headX, PAD);
-
-    const modeKey = state.gameMode === 'kout' ? 'gameKout'
-                  : state.gameMode === 'sebeeta' ? 'gameSebeeta' : 'gameCustom';
-    ctx.fillStyle = C.ink;
-    ctx.font = fbody(72, 700);
-    ctx.fillText(t(modeKey), headX, PAD + 44);
-
-    // Date in the opposite corner
-    const date = new Date().toLocaleDateString(rtl ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    ctx.textAlign = rtl ? 'left' : 'right';
-    ctx.fillStyle = C.muted;
-    ctx.font = fbody(24, 500);
-    ctx.fillText(date, rtl ? PAD : W - PAD, PAD + 12);
-
-    // --- Winner / standings data ---
-    // Each team row carries an optional players[] list (name + score). Sebeeta
-    // has per-player scores; Kout doesn't track them (contracts pay the team),
-    // so players show name-only and the team total stays on the header.
-    const totalsArr = totals();
-    const winner = checkWinner(totalsArr);
-
-    // Build {name, score|null} entries for the players on a team.
-    // Pass playerTotals=null when per-player scores aren't meaningful (Kout).
-    function _teamPlayersWithScores(teamIdx, playerTotals) {
-      const out = [];
-      (state.playerTeam || []).forEach((tIdx, pIdx) => {
-        if (tIdx === teamIdx && state.players[pIdx]) {
-          out.push({
-            name: state.players[pIdx],
-            score: playerTotals ? playerTotals[pIdx] : null,
-          });
-        }
-      });
-      return out;
-    }
-
-    let rows = [];
-    if (state.gameMode === 'kout') {
-      rows = [
-        { name: teamName(0), score: totalsArr[0], isTeam: true, idx: 0, showHeaderScore: true,  players: _teamPlayersWithScores(0, null) },
-        { name: teamName(1), score: totalsArr[1], isTeam: true, idx: 1, showHeaderScore: true,  players: _teamPlayersWithScores(1, null) },
-      ];
-    } else if (state.gameMode === 'sebeeta') {
-      const tT = teamTotalsFromPlayers(totalsArr);
-      rows = [
-        { name: teamName(0), score: tT[0], isTeam: true, idx: 0, showHeaderScore: false, players: _teamPlayersWithScores(0, totalsArr) },
-        { name: teamName(1), score: tT[1], isTeam: true, idx: 1, showHeaderScore: false, players: _teamPlayersWithScores(1, totalsArr) },
-      ];
-    } else {
-      rows = state.players.map((nm, i) => ({
-        name: nm, score: totalsArr[i], isTeam: false, idx: i, showHeaderScore: true, players: [],
-      }));
-    }
-    // Sort: best-by-winRule first.
-    rows = rows.slice().sort((a, b) =>
-      state.winRule === 'highest' ? (b.score - a.score) : (a.score - b.score)
-    );
-
-    // Resolve the winner display from rows. Sebeeta intentionally has no
-    // score subtitle on the winner card — the team name is enough.
-    let winnerName, winnerScoreText;
-    if (winner && winner.type === 'team' && state.gameMode === 'kout') {
-      winnerName = teamName(winner.idx);
-      winnerScoreText = `${totalsArr[winner.idx]}–${totalsArr[1 - winner.idx]}`;
-    } else if (winner && winner.type === 'team' && state.gameMode === 'sebeeta') {
-      winnerName = teamName(winner.idx);
-      winnerScoreText = '';
-    } else if (winner && winner.type === 'team') {
-      winnerName = teamName(winner.idx);
-      winnerScoreText = String((rows.find(r => r.idx === winner.idx) || rows[0]).score);
-    } else if (winner && winner.type === 'player') {
-      winnerName = state.players[winner.idx];
-      winnerScoreText = String(totalsArr[winner.idx]);
-    } else {
-      // Mid-game: leader from rows. Sebeeta intentionally suppresses the
-      // numeric score subtitle (matches the in-game design intent).
-      winnerName = rows[0].name || '—';
-      winnerScoreText = state.gameMode === 'sebeeta' ? '' : String(rows[0].score);
-    }
-
-    // --- Winner card ---
-    const cardX = PAD, cardY = PAD + 160;
-    const cardW = W - PAD * 2, cardH = 360;
-    drawRoundRect(ctx, cardX, cardY, cardW, cardH, 36);
-    ctx.fillStyle = C.surface;
-    ctx.fill();
-    ctx.strokeStyle = C.line;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.font = '140px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
-    ctx.fillStyle = C.gold;
-    ctx.fillText('🏆', W / 2, cardY + 32);
-
-    ctx.fillStyle = C.ink;
-    ctx.font = fbody(72, 700);
-    ctx.fillText(winnerName, W / 2, cardY + 190);
-
-    ctx.fillStyle = C.muted;
-    ctx.font = fmono(40, 600);
-    ctx.fillText(winnerScoreText, W / 2, cardY + 282);
-
-    // --- Standings list ---
-    let listY = cardY + cardH + 60;
-    ctx.textAlign = rtl ? 'right' : 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = C.muted;
-    ctx.font = fbody(22, 600);
-    const eyebrow = (t('finalStandings') || 'Final Standings').toUpperCase();
-    ctx.fillText(eyebrow, headX, listY);
-    listY += 38;
-
-    // Row height adapts to player count when teams are present.
-    // Layout: top padding, header line (team or solo name), per-player lines, bottom padding.
-    const HEADER_LINE  = 50;
-    const PLAYER_LINE  = 32;
-    const ROW_PAD_TOP  = 22;
-    const ROW_PAD_BOT  = 22;
-    const SOLO_ROW_H   = 88; // unchanged for Custom
-
-    function _rowHeight(r) {
-      if (!r.isTeam) return SOLO_ROW_H;
-      const n = (r.players && r.players.length) || 0;
-      return ROW_PAD_TOP + HEADER_LINE + (n > 0 ? n * PLAYER_LINE : 0) + ROW_PAD_BOT;
-    }
-
-    const rowGap = 14;
-    let cursorY = listY;
-    rows.forEach((r, i) => {
-      const rh = _rowHeight(r);
-      const ry = cursorY;
-      cursorY += rh + rowGap;
-
-      drawRoundRect(ctx, PAD, ry, W - PAD * 2, rh, 26);
-      ctx.fillStyle = i === 0 ? withAlpha(C.gold, 0.18) : C.surface;
-      ctx.fill();
-      ctx.strokeStyle = i === 0 ? withAlpha(C.gold, 0.45) : C.line;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Rank chip — aligned to the header line, not the whole row's centre.
-      const chipR = 22;
-      const chipCX = rtl ? W - PAD - 40 : PAD + 40;
-      const chipCY = r.isTeam ? ry + ROW_PAD_TOP + HEADER_LINE / 2 : ry + rh / 2;
-      ctx.beginPath();
-      ctx.arc(chipCX, chipCY, chipR, 0, Math.PI * 2);
-      ctx.fillStyle = i === 0 ? C.gold : withAlpha(C.ink, 0.10);
-      ctx.fill();
-      ctx.fillStyle = i === 0 ? C.onGold : C.ink;
-      ctx.font = fbody(22, 700);
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(String(i + 1), chipCX, chipCY + 1);
-
-      ctx.textAlign = rtl ? 'right' : 'left';
-      const nameX     = rtl ? W - PAD - 80 : PAD + 80;
-      const scoreEdge = rtl ? PAD + 28      : W - PAD - 28;
-
-      if (r.isTeam) {
-        // --- Header line: team name + (optional) team total ---
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = C.ink;
-        ctx.font = fbody(34, 700);
-        ctx.fillText(r.name || '—', nameX, chipCY);
-
-        if (r.showHeaderScore) {
-          ctx.textAlign = rtl ? 'left' : 'right';
-          ctx.fillStyle = C.inkSoft;
-          ctx.font = fmono(36, 600);
-          ctx.fillText(String(r.score), scoreEdge, chipCY);
-        }
-
-        // --- Per-player lines ---
-        if (r.players && r.players.length > 0) {
-          // Faint divider between header and players.
-          ctx.beginPath();
-          const divY = ry + ROW_PAD_TOP + HEADER_LINE;
-          ctx.moveTo(PAD + 28, divY);
-          ctx.lineTo(W - PAD - 28, divY);
-          ctx.strokeStyle = C.line;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-
-          r.players.forEach((p, pi) => {
-            const py = ry + ROW_PAD_TOP + HEADER_LINE + (pi + 0.5) * PLAYER_LINE;
-            // Name
-            ctx.textAlign = rtl ? 'right' : 'left';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = C.inkSoft;
-            ctx.font = fbody(22, 500);
-            ctx.fillText(p.name || '—', nameX, py);
-            // Per-player score (sebeeta only — kout sets score to null)
-            if (p.score !== null && p.score !== undefined) {
-              ctx.textAlign = rtl ? 'left' : 'right';
-              ctx.fillStyle = C.muted;
-              ctx.font = fmono(22, 600);
-              ctx.fillText(String(p.score), scoreEdge, py);
-            }
-          });
-        }
-      } else {
-        // Solo row (Custom mode): single line, name + score.
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = C.ink;
-        ctx.font = fbody(34, 600);
-        ctx.fillText(r.name || '—', nameX, ry + rh / 2);
-        ctx.textAlign = rtl ? 'left' : 'right';
-        ctx.fillStyle = C.inkSoft;
-        ctx.font = fmono(36, 600);
-        ctx.fillText(String(r.score), scoreEdge, ry + rh / 2);
-      }
-    });
-
-    // --- Footer: rounds + meta ---
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillStyle = C.muted;
-    ctx.font = fbody(24, 500);
-    const footer = t('roundsPlayed') ? t('roundsPlayed')(state.scores.length) : `${state.scores.length} rounds`;
-    ctx.fillText(footer, W / 2, H - PAD);
-
-    return new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/png', 0.95));
-  }
-
-  // --- Canvas helpers ---
-  function drawRoundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
-  function softBlob(ctx, cx, cy, radius, color) {
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-    g.addColorStop(0, color);
-    g.addColorStop(1, color.replace(/[\d.]+\)$/, '0)'));
-    ctx.fillStyle = g;
-    ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
-  }
-  // Convert "#rrggbb" or "rgba(r,g,b,a)" into rgba with a new alpha.
-  function withAlpha(color, alpha) {
-    if (color.startsWith('rgba')) {
-      return color.replace(/rgba\(([^)]+)\)/, (_, body) => {
-        const parts = body.split(',').map(s => s.trim());
-        return `rgba(${parts[0]},${parts[1]},${parts[2]},${alpha})`;
-      });
-    }
-    if (color.startsWith('rgb(')) {
-      return color.replace(/rgb\(([^)]+)\)/, (_, body) => `rgba(${body}, ${alpha})`);
-    }
-    if (color.startsWith('#')) {
-      const hex = color.slice(1);
-      const v = hex.length === 3
-        ? hex.split('').map(c => parseInt(c + c, 16))
-        : [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
-      return `rgba(${v[0]},${v[1]},${v[2]},${alpha})`;
-    }
-    return color;
-  }
 
   function toggleMinus(i) {
     const input = document.getElementById('roundScore' + i);
@@ -3779,9 +3140,7 @@
     navigate('home');
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
+  // escapeHtml is imported from js/util.js.
 
   // Init
   applyTheme();
@@ -3807,6 +3166,25 @@
       navigator.serviceWorker.register('sw.js').catch(() => {});
     });
   }
+
+  // ---- Expose handlers used by HTML onclick= / onchange= attributes ----
+  // Because this script is a module, locals are *not* global. Every function
+  // referenced from an inline event attribute must be re-exposed on `window`.
+  // Functions wired via `el.onclick = () => fn()` don't need this — they
+  // capture by closure.
+  Object.assign(window, {
+    toggleTheme, toggleSound,
+    setLang,
+    pickGame, buildPlayerInputs, startGame,
+    navigate,
+    openSheet, closeSheet, submitRound,
+    undoRound,
+    resetGame, clearPlayers,
+    winnerNewGame, winnerHome,
+    shareGameImage,
+    setKoutEntryMode, setEntryStyle,
+    startEditRound, saveEditedRound, cancelEditRound, deleteRound,
+  });
 </script>
 </body>
 </html>

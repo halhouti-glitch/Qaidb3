@@ -9,7 +9,8 @@
  *   - Bumping CACHE_VERSION evicts old caches on activate.
  */
 
-const CACHE_VERSION = 'qaid-v1';
+// Bump this whenever APP_SHELL changes so the old caches get evicted on activate.
+const CACHE_VERSION = 'qaid-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -19,6 +20,11 @@ const APP_SHELL = [
   './icon-512.png',
   './apple-touch-icon.png',
   './favicon-32.png',
+  // ES module entry + dependencies — pre-cached so the app loads offline.
+  './js/i18n.js',
+  './js/scoring.js',
+  './js/share.js',
+  './js/util.js',
 ];
 
 self.addEventListener('install', (event) => {
