@@ -10,7 +10,7 @@
  */
 
 // Bump this whenever APP_SHELL changes so the old caches get evicted on activate.
-const CACHE_VERSION = 'qaid-v2';
+const CACHE_VERSION = 'qaid-v3';
 const APP_SHELL = [
   './',
   './index.html',

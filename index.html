@@ -942,6 +942,25 @@
     flex-direction: column;
     gap: 12px;
   }
+  /* Container that renderHome() populates with .game-card buttons from the
+     js/games registry. Same flex column + gap as .home-body so the cards
+     stack with identical spacing whether or not they're inside this wrapper. */
+  .home-game-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  /* Small muted version label that sits at the bottom of the home screen. */
+  .app-version {
+    margin-top: 24px;
+    text-align: center;
+    font-family: var(--font-num);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    opacity: 0.6;
+    user-select: none;
+  }
   .game-card {
     background: var(--surface);
     border-radius: var(--radius-l);
@@ -1584,8 +1603,12 @@
       <div class="sub" data-t="homeSub"></div>
     </div>
     <div class="home-body">
-      <button type="button" class="game-card" onclick="pickGame('sebeeta')">
-        <div class="gc-art" data-game="sebeeta">
+      <!-- Game cards are rendered into this container by renderHome() from the
+           js/games registry. Adding a new game = a registry entry + an
+           <template id="art-{key}"> SVG block below. -->
+      <div id="homeGameList" class="home-game-list"></div>
+
+      <template id="art-sebeeta">
           <svg viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sebeeta">
             <defs><style>
               .sa-bg{fill:#FFFFFF;stroke:#0F1A2E;stroke-width:2}
@@ -1682,16 +1705,9 @@
               </g>
             </g>
           </svg>
-        </div>
-        <div class="gc-meta">
-          <div class="name" data-t="gameSebeeta"></div>
-          <div class="desc" data-t="gameSebeetaDesc"></div>
-          <div class="meta-row"><span data-t="gameSebeetaMeta"></span></div>
-        </div>
-      </button>
+      </template>
 
-      <button type="button" class="game-card" onclick="pickGame('kout')">
-        <div class="gc-art" data-game="kout">
+      <template id="art-kout">
           <svg viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kout">
             <defs><style>
               .ka-bg{fill:#FFFFFF;stroke:#0F1A2E;stroke-width:2}
@@ -1735,16 +1751,9 @@
               </g>
             </g>
           </svg>
-        </div>
-        <div class="gc-meta">
-          <div class="name" data-t="gameKout"></div>
-          <div class="desc" data-t="gameKoutDesc"></div>
-          <div class="meta-row"><span data-t="gameKoutMeta"></span></div>
-        </div>
-      </button>
+      </template>
 
-      <button type="button" class="game-card" onclick="pickGame('custom')">
-        <div class="gc-art" data-game="custom">
+      <template id="art-custom">
           <svg viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Custom — open scorepad">
             <defs><style>
               .cb-bg{fill:#FFFFFF;stroke:#0F1A2E;stroke-width:2}
@@ -1820,13 +1829,7 @@
               <text class="cb-mark" x="55" y="86" text-anchor="middle">Q</text>
             </g>
           </svg>
-        </div>
-        <div class="gc-meta">
-          <div class="name" data-t="gameCustom"></div>
-          <div class="desc" data-t="gameCustomDesc"></div>
-          <div class="meta-row"><span data-t="gameCustomMeta"></span></div>
-        </div>
-      </button>
+      </template>
 
       <div id="resumeRow" class="resume-row hidden">
         <button type="button" onclick="navigate('play')" data-t="resumeGame"></button>
@@ -1845,6 +1848,9 @@
         </div>
         <div id="recentList"></div>
       </div>
+      <!-- App version — populated from APP_VERSION at init time. Muted footer
+           that doubles as a build marker for the user when reporting bugs. -->
+      <div id="appVersion" class="app-version" aria-hidden="true"></div>
     </div>
   </div>
 
@@ -2008,6 +2014,12 @@
   } from './js/scoring.js';
   import { escapeHtml } from './js/util.js';
   import { shareGameImage as _shareGameImage } from './js/share.js';
+  import { GAMES, GAME_ORDER, getGame, isTeamMode as _isTeamModeKey } from './js/games/index.js';
+
+  // App version — bump on every release. Surfaced in the home-screen footer
+  // (see #appVersion) so users can quote it when reporting issues. Keep in
+  // sync with sw.js CACHE_VERSION so PWA caches evict on updates.
+  const APP_VERSION = 'v0.4.0';
 
   // Wrapper: the imported renderer needs the live state passed in; the HTML
   // onclick handler doesn't have access to module-scoped vars, so we adapt.
@@ -2089,7 +2101,7 @@
     if (custom) return custom;
     return i === 0 ? t('teamAFull') : t('teamBFull');
   }
-  function isTeamMode() { return state.gameMode === 'sebeeta' || state.gameMode === 'kout'; }
+  function isTeamMode() { return _isTeamModeKey(state.gameMode); }
 
   // Per-entity color (player color for player rows, team color for team rows / kout)
   function eColor(i) { return state.gameMode === 'kout' ? tcolor(i) : pcolor(i); }
@@ -2257,12 +2269,58 @@
     // Mode-specific form state (hides threshold/winRule + locks numPlayers for team modes)
     onGameModeChange();
     // For team modes there's no config step — jump straight to player/team setup
-    if (mode === 'sebeeta' || mode === 'kout') {
+    if (_isTeamModeKey(mode)) {
       buildPlayerInputs();
     }
   }
 
+  // Build the home-screen game-card grid from the js/games registry. Each
+  // card clones its SVG <template id="art-{key}"> and wraps it with a meta
+  // block whose labels point at i18n keys via data-t so language switches
+  // refresh them without rebuilding. Idempotent — safe to call repeatedly.
+  function _buildGameCardsOnce() {
+    const list = document.getElementById('homeGameList');
+    if (!list || list.children.length) return;
+    GAME_ORDER.forEach((key) => {
+      const game = GAMES[key];
+      if (!game) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'game-card';
+      btn.onclick = () => pickGame(key);
+
+      // Art column — clone the inert <template> SVG for this game.
+      const art = document.createElement('div');
+      art.className = 'gc-art';
+      art.setAttribute('data-game', key);
+      const tmpl = document.getElementById(game.artId);
+      if (tmpl && tmpl.content) art.appendChild(tmpl.content.cloneNode(true));
+
+      // Meta column — name + description + small meta line.
+      const meta = document.createElement('div');
+      meta.className = 'gc-meta';
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.setAttribute('data-t', game.i18nKey);
+      const desc = document.createElement('div');
+      desc.className = 'desc';
+      desc.setAttribute('data-t', game.descKey);
+      const metaRow = document.createElement('div');
+      metaRow.className = 'meta-row';
+      const metaSpan = document.createElement('span');
+      metaSpan.setAttribute('data-t', game.metaKey);
+      metaRow.appendChild(metaSpan);
+      meta.append(name, desc, metaRow);
+
+      btn.append(art, meta);
+      list.appendChild(btn);
+    });
+    // Populate label text via the same path as the rest of the UI.
+    applyLang();
+  }
+
   function renderHome() {
+    _buildGameCardsOnce();
     // Resume row: show if there's an active game with scores
     const hasActive = state.players.length > 0 && state.scores.length > 0 && !state.gameOver;
     document.getElementById('resumeRow').classList.toggle('hidden', !hasActive);
@@ -2600,19 +2658,21 @@
   }
 
   function onGameModeChange() {
-    const mode = selectedSetupMode;
-    const isTeam = (mode === 'sebeeta' || mode === 'kout');
-    // For team modes the config row is hidden entirely (numPlayers locked at 6,
-    // threshold + winRule are presets, no need for a "Done" step).
-    document.getElementById('setupConfigRow').classList.toggle('hidden', isTeam);
-    document.getElementById('thresholdWrap').style.display = isTeam ? 'none' : '';
-    document.getElementById('winRuleWrap').style.display = isTeam ? 'none' : '';
-    if (isTeam) {
-      const np = document.getElementById('numPlayers');
-      np.value = 6;
+    const game = getGame(selectedSetupMode);
+    if (!game) return;
+    // For team modes the config row is hidden entirely (numPlayers locked,
+    // threshold + winRule are presets, no need for a "Done" step). Custom (and
+    // any future configurable mode) keeps the threshold + winRule controls.
+    const showConfig = !!game.configurable;
+    document.getElementById('setupConfigRow').classList.toggle('hidden', !showConfig);
+    document.getElementById('thresholdWrap').style.display = showConfig ? '' : 'none';
+    document.getElementById('winRuleWrap').style.display    = showConfig ? '' : 'none';
+    const np = document.getElementById('numPlayers');
+    if (game.numPlayers) {
+      np.value = game.numPlayers;
       np.disabled = true;
     } else {
-      document.getElementById('numPlayers').disabled = false;
+      np.disabled = false;
     }
     document.getElementById('playerNameSection').classList.add('hidden');
   }
@@ -2632,16 +2692,19 @@
   }
 
   function buildPlayerInputs() {
-    const mode = selectedSetupMode;
-    const isTeam = (mode === 'sebeeta' || mode === 'kout');
-    const n = isTeam ? 6 : Math.max(2, Math.min(6, parseInt(document.getElementById('numPlayers').value) || 2));
+    const game = getGame(selectedSetupMode);
+    if (!game) return;
+    const isTeam = !!game.isTeamMode;
+    // Team modes have a locked player count from the registry; otherwise honour
+    // the user's selection (clamped to 2–6).
+    const n = game.numPlayers
+      ? game.numPlayers
+      : Math.max(2, Math.min(6, parseInt(document.getElementById('numPlayers').value) || 2));
     document.getElementById('numPlayers').value = n;
 
-    // Hint text under "Player Names"
+    // Hint text under "Player Names" — pulled from the registry's hintKey.
     const hint = document.getElementById('setupHint');
-    if (mode === 'sebeeta') hint.textContent = t('sebeetaHint');
-    else if (mode === 'kout') hint.textContent = t('koutHint');
-    else hint.textContent = '';
+    hint.textContent = game.hintKey ? t(game.hintKey) : '';
 
     // Team assignment is fixed by position: players 1,3,5 → team 0; players 2,4,6 → team 1.
     setupTeams = [];
@@ -2755,8 +2818,10 @@
 
   function startGame() {
     const mode = selectedSetupMode;
-    const isTeam = (mode === 'sebeeta' || mode === 'kout');
-    const n = isTeam ? 6 : parseInt(document.getElementById('numPlayers').value);
+    const game = getGame(mode);
+    if (!game) return;
+    const isTeam = !!game.isTeamMode;
+    const n = game.numPlayers || parseInt(document.getElementById('numPlayers').value);
 
     const players = [];
     for (let i = 0; i < n; i++) {
@@ -2765,10 +2830,10 @@
     }
 
     if (isTeam) {
-      // Validate balanced teams: must be exactly 3 / 3
+      // Validate balanced teams: each side must hold exactly `teamSize` players.
       const aCount = setupTeams.filter(x => x === 0).length;
       const bCount = setupTeams.filter(x => x === 1).length;
-      if (aCount !== 3 || bCount !== 3) {
+      if (aCount !== game.teamSize || bCount !== game.teamSize) {
         alert(t('teamUneven')(aCount, bCount));
         return;
       }
@@ -2793,15 +2858,15 @@
     editingRound = null;
     resetContract();
 
-    if (mode === 'sebeeta') {
-      state.threshold = 201;
-      state.winRule = 'lowest';  // individual lowest wins (anyone hitting 201 = team loses)
-    } else if (mode === 'kout') {
-      state.threshold = 101;
-      state.winRule = 'highest'; // first team to 101 wins
+    // Defaults come from the registry. For `configurable` games (custom) the
+    // setup form overrides them; for fixed games (sebeeta/kout) the form
+    // controls are hidden and the registry values are authoritative.
+    if (game.configurable) {
+      state.threshold = parseInt(document.getElementById('threshold').value) || game.defaultThreshold;
+      state.winRule = document.getElementById('winRule').value || game.winRule;
     } else {
-      state.threshold = parseInt(document.getElementById('threshold').value) || 201;
-      state.winRule = document.getElementById('winRule').value;
+      state.threshold = game.defaultThreshold;
+      state.winRule = game.winRule;
     }
 
     state.currentScreen = 'play';
@@ -3565,6 +3630,10 @@
   applyTheme();
   applyLang();
   applySound();
+  // Surface the build version in the home footer (set once; no need to
+  // re-render). Safe even if the element isn't yet in the DOM tree.
+  const _verEl = document.getElementById('appVersion');
+  if (_verEl) _verEl.textContent = APP_VERSION;
   if (!load()) {
     // Fresh session — land on Home screen
     navigate('home');
