@@ -2019,7 +2019,7 @@
   // App version — bump on every release. Surfaced in the home-screen footer
   // (see #appVersion) so users can quote it when reporting issues. Keep in
   // sync with sw.js CACHE_VERSION so PWA caches evict on updates.
-  const APP_VERSION = 'v0.4.0';
+  const APP_VERSION = 'v0.4.1';
 
   // Wrapper: the imported renderer needs the live state passed in; the HTML
   // onclick handler doesn't have access to module-scoped vars, so we adapt.
@@ -2507,9 +2507,11 @@
     const lastPlayed = profile.lastPlayed
       ? relativeWhen(profile.lastPlayed)
       : t('profileNeverPlayed');
-    const topMate = _topTeammate(profile);
-    const teammateValue = topMate
-      ? `<div class="value small">${escapeHtml(t('profileTeammateOf')(topMate.name, topMate.count))}</div>`
+    const topMates = _topTeammates(profile, 2);
+    const teammateValue = topMates.length
+      ? topMates
+          .map((m) => `<div class="value small">${escapeHtml(t('profileTeammateOf')(m.name, m.count))}</div>`)
+          .join('')
       : '<div class="value small">—</div>';
 
     body.innerHTML = `
@@ -2593,16 +2595,18 @@
     render();
   }
 
-  // Find the name (canonical case) most frequently teamed with this player.
-  function _topTeammate(profile) {
-    if (!profile || !profile.teammates) return null;
-    let bestKey = null, bestCount = 0;
-    for (const [k, c] of Object.entries(profile.teammates)) {
-      if (c > bestCount) { bestCount = c; bestKey = k; }
-    }
-    if (!bestKey) return null;
-    const otherProfile = state.playerProfiles[bestKey];
-    return { name: otherProfile ? otherProfile.name : bestKey, count: bestCount };
+  // Return up to `limit` partners most frequently teamed with this player,
+  // sorted by count desc. 3v3 games (Sebeeta/Kout) give each player two
+  // teammates per game, so the default of 2 surfaces both of them.
+  function _topTeammates(profile, limit = 2) {
+    if (!profile || !profile.teammates) return [];
+    const entries = Object.entries(profile.teammates)
+      .filter(([, c]) => c > 0)
+      .sort((a, b) => b[1] - a[1]);
+    return entries.slice(0, limit).map(([k, count]) => {
+      const otherProfile = state.playerProfiles[k];
+      return { name: otherProfile ? otherProfile.name : k, count };
+    });
   }
 
   // ===== Bottom sheet for round entry =====

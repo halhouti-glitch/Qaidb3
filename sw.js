@@ -10,7 +10,7 @@
  */
 
 // Bump this whenever APP_SHELL changes so the old caches get evicted on activate.
-const CACHE_VERSION = 'qaid-v3';
+const CACHE_VERSION = 'qaid-v4';
 const APP_SHELL = [
   './',
   './index.html',
@@ -25,6 +25,7 @@ const APP_SHELL = [
   './js/scoring.js',
   './js/share.js',
   './js/util.js',
+  './js/games/index.js',
 ];
 
 self.addEventListener('install', (event) => {
